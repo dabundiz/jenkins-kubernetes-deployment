@@ -38,9 +38,20 @@ pipeline {
     }
 
     stage('Deploying React.js container to Kubernetes') {
+      //steps {
+        //script {
+        //  kubernetesDeploy(configs: "deployment.yaml", "service.yaml")
+        //}
+      //}
       steps {
-        script {
-          kubernetesDeploy(configs: "deployment.yaml", "service.yaml")
+        // Apply Kubernetes deployment using the Kubernetes service account
+        withCredentials([string(credentialsId: '46511131-0eb5-4abf-a3d2-ec22a281e93b', variable: 'KUBE_SA_TOKEN')]) {
+          sh 'kubectl apply -f "*.yaml" \
+            --token=$KUBE_SA_TOKEN \
+            --server=http://127.0.0.1:33959/ \
+            --insecure-skip-tls-verify'
+        //withKubeConfig([credentialsId: '46511131-0eb5-4abf-a3d2-ec22a281e93b', serverUrl: 'http://127.0.0.1:45903/']) {
+          //sh 'kubectl apply -f kubernetes-deployment.yaml'
         }
       }
     }
